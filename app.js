@@ -8,7 +8,7 @@ const app = express();
 const port = 3000; //部署到 Vercel 已不需要這行
 const AESAlgorithm = "aes-128-cbc";
 const frontendurl =
-  "https://ecpay-embedded-checkout-git-main-evojroans-projects.vercel.app";
+  "http://localhost:5173";
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
@@ -38,25 +38,25 @@ function AESDecrypt(inputParams, HashKey, HashIV) {
 
 //呼叫  ECPay API：付款 GetTokenbyTrade
 async function RequestECPayAPIs(action, payload) {
-  if (action == "GetTokenbyTrade") {
+  if (action == "GetTokenbyBindingCard") {
     try {
       const response = await axios.post(
-        "https://ecpg-stage.ecpay.com.tw/Merchant/GetTokenbyTrade",
+        "https://ecpg-stage.ecpay.com.tw/Merchant/GetTokenbyBindingCard",
         payload
       );
-      console.log("GetTokenByTrade: ", response.data);
+      console.log("GetTokenbyBindingCard: ", response.data);
       return response.data;
     } catch (err) {
       console.error(err);
       throw err;
     }
-  } else if (action == "CreatePayment") {
+  } else if (action == "CreateBindCard") {
     try {
       const response = await axios.post(
-        "https://ecpg-stage.ecpay.com.tw/Merchant/CreatePayment",
+        "https://ecpg-stage.ecpay.com.tw/Merchant/CreateBindCard",
         payload
       );
-      console.log("CreatePayment: ", response.data);
+      console.log("CreateBindCard 結果：", response.data);
       return response.data;
     } catch (err) {
       console.error(err);
@@ -66,7 +66,7 @@ async function RequestECPayAPIs(action, payload) {
 }
 
 // 加解密：取得廠商驗證碼 GetTokenbyTrade：接收前端送來的加密前 Data，加密後再呼叫 API (async function RequestECPayAPIs)
-app.post("/GetTokenbyTrade", async (req, res) => {
+app.post("/GetTokenbyBindingCard", async (req, res) => {
   try {
     const {MerchantID, RqHeader, Data} = req.body;
     const encryptedData = AESEncrypt(
@@ -74,14 +74,14 @@ app.post("/GetTokenbyTrade", async (req, res) => {
       MID[MerchantID].HashKey,
       MID[MerchantID].HashIV
     );
-    const GetTokenbyTradePayload = {
+    const GetTokenbyBindingCardPayload = {
       MerchantID,
       RqHeader,
       Data: encryptedData
     };
     const result = await RequestECPayAPIs(
-      "GetTokenbyTrade",
-      GetTokenbyTradePayload
+      "GetTokenbyBindingCard",
+      GetTokenbyBindingCardPayload
     );
     const decryptedData = AESDecrypt(
       result.Data,
@@ -90,13 +90,13 @@ app.post("/GetTokenbyTrade", async (req, res) => {
     );
     res.json(decryptedData.Token);
   } catch (error) {
-    console.error("Error in GetTokenbyTrade:", error);
+    console.error("Error in GetTokenbyBindingCard:", error);
     res.status(500).json({error: "內部伺服器錯誤"});
   }
 });
 
 // 加解密：建立付款 CreatePayment：接收前端送來的加密前 Data，加密後再呼叫 API (async function RequestECPayAPIs)
-app.post("/CreatePayment", async (req, res) => {
+app.post("/CreateBindCard", async (req, res) => {
   try {
     const {MerchantID, RqHeader, Data} = req.body;
     const encryptedData = AESEncrypt(
@@ -104,14 +104,14 @@ app.post("/CreatePayment", async (req, res) => {
       MID[MerchantID].HashKey,
       MID[MerchantID].HashIV
     );
-    const CreatePaymentPayload = {
+    const CreateBindCardPayload = {
       MerchantID,
       RqHeader,
       Data: encryptedData
     };
     const result = await RequestECPayAPIs(
-      "CreatePayment",
-      CreatePaymentPayload
+      "CreateBindCard",
+      CreateBindCardPayload
     );
     const decryptedData = AESDecrypt(
       result.Data,
@@ -121,7 +121,7 @@ app.post("/CreatePayment", async (req, res) => {
 
     res.json(decryptedData);
   } catch (error) {
-    console.error("Error in CreatePayment:", error);
+    console.error("Error in CreateBindCard:", error);
     res.status(500).json({error: "內部伺服器錯誤"});
   }
 });
@@ -147,7 +147,7 @@ app.post("/OrderResultURL", async (req, res) => {
       `${frontendurl}/OrderResultURL?MerchantTradeNo=${MerchantTradeNo}`
     );
   } catch (error) {
-    console.error("Error in CreatePayment:", error);
+    console.error("Error in CreateBindCard:", error);
     res.status(500).json({error: "OrderResultURL 錯誤"});
   }
 });
@@ -165,9 +165,9 @@ app.get("/api/getOrderResult", (req, res) => {
 });
 
 //部署到 Vercel 取消這段
-// app.listen(port, () => {
-//   console.log(`Server running at http://localhost:${port}`);
-// });
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
 
 // 部署到 Vercel 需要增加這一行
-export default app;
+//export default app;
