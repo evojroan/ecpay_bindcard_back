@@ -5,7 +5,7 @@ import cors from "cors";
 import axios from "axios";
 
 const app = express();
-const port = 3000; //部署到 Vercel 已不需要這行
+//const port = 3000; //部署到 Vercel 已不需要這行
 const AESAlgorithm = "aes-128-cbc";
 const frontendurl =
   "http://localhost:5173";
@@ -143,7 +143,6 @@ app.post("/OrderResultURL", async (req, res) => {
 
     // 重定向到前端頁面，附帶訂單編號
     res.redirect(
-      //      `http://localhost:5173/OrderResultURL?MerchantTradeNo=${MerchantTradeNo}`
       `${frontendurl}/OrderResultURL?MerchantTradeNo=${MerchantTradeNo}`
     );
   } catch (error) {
@@ -165,9 +164,9 @@ app.get("/api/getOrderResult", (req, res) => {
 });
 
 //部署到 Vercel 取消這段
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Server running at http://localhost:${port}`);
+// });
 
 // 部署到 Vercel 需要增加這一行
-//export default app;
+export default app;
