@@ -8,7 +8,7 @@ const app = express();
 //const port = 3000; //部署到 Vercel 已不需要這行
 const AESAlgorithm = "aes-128-cbc";
 const frontendurl =
-  "http://localhost:5173";
+  "ecpay-bindcard-front.vercel.app";
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
