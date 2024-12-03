@@ -5,10 +5,13 @@ import cors from "cors";
 import axios from "axios";
 
 const app = express();
-//const port = 3000; //部署到 Vercel 已不需要這行
+const port = 3000; //部署到 Vercel 已不需要這行
 const AESAlgorithm = "aes-128-cbc";
 const frontendurl =
-  "ecpay-bindcard-front.vercel.app";
+  "https://ecpay-bindcard-front.vercel.app/";
+
+  // const frontendurl =
+  // "http://localhost:5173";
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
